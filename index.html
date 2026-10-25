@@ -4,7 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#e8f9f6">
-  <title>WonderLearn | Materiais educativos em PDF</title>
+  <title>Pequenos Brincantes | Materiais educativos em PDF</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
@@ -12,9 +12,9 @@
 </head>
 <body>
   <header class="site-header" id="inicio">
-    <a class="brand" href="#inicio" aria-label="WonderLearn, início"><span class="brand-mark">📚</span><span>Wonder<b>Learn</b><small>Materiais para aprender e ensinar</small></span></a>
+    <a class="brand brand-logo" href="#inicio" aria-label="Pequenos Brincantes, início"><img src="brand-logo.png" alt="Pequenos Brincantes — Atividades Educativas"></a>
     <nav aria-label="Navegação principal"><a href="#etapas">Etapas de ensino</a><a href="#acervo">Acervo</a><a href="#como-funciona">Como funciona</a></nav>
-    <button class="button button-green header-add" id="cart-button" type="button">🛒 Carrinho <span id="cart-count">0</span></button>
+    <div class="header-actions"><a class="account-chip" id="account-link" href="/account">Entrar</a><button class="button button-green header-add" id="cart-button" type="button">🛒 Carrinho <span id="cart-count">0</span></button></div>
   </header>
 
   <main>
@@ -33,29 +33,31 @@
     <section class="section section-mint" id="etapas">
       <div class="container"><div class="section-heading"><div><span class="eyebrow">ENCONTRE O MATERIAL CERTO</span><h2>Explore por etapa de ensino</h2><p>Selecione uma etapa para ver os materiais disponíveis.</p></div></div>
         <div class="level-grid">
-          <button class="level-card" data-level="Educação Infantil"><span class="level-icon">🧸</span><strong>Educação Infantil</strong><small>Brincadeiras, cores, formas e primeiras descobertas</small><span class="card-link">Ver materiais →</span></button>
-          <button class="level-card" data-level="Fundamental I"><span class="level-icon">✏️</span><strong>Fundamental I</strong><small>Alfabetização, matemática e ciências do 1º ao 5º ano</small><span class="card-link">Ver materiais →</span></button>
-          <button class="level-card" data-level="Fundamental II"><span class="level-icon">🔬</span><strong>Fundamental II</strong><small>Conteúdos e atividades do 6º ao 9º ano</small><span class="card-link">Ver materiais →</span></button>
-          <button class="level-card" data-level="Ensino Médio"><span class="level-icon">🌍</span><strong>Ensino Médio</strong><small>Revisões, estudos e preparação para novos caminhos</small><span class="card-link">Ver materiais →</span></button>
-          <button class="level-card" data-level="EJA"><span class="level-icon">💡</span><strong>EJA</strong><small>Materiais para Educação de Jovens e Adultos</small><span class="card-link">Ver materiais →</span></button>
-          <button class="level-card" data-level="Outros"><span class="level-icon">🎨</span><strong>Outros materiais</strong><small>Projetos, atividades extras e recursos pedagógicos</small><span class="card-link">Ver materiais →</span></button>
+          <button class="level-card" data-level="Educação Infantil"><span class="level-icon tint-mint"><img src="/assets/twemoji/1f9e9.svg" alt="" aria-hidden="true" width="28" height="28"></span><strong>Educação Infantil</strong><small>Brincadeiras, cores, formas e primeiras descobertas</small><span class="card-link">Ver materiais →</span></button>
+          <button class="level-card" data-level="Fundamental I"><span class="level-icon tint-sky"><img src="/assets/twemoji/270f.svg" alt="" aria-hidden="true" width="28" height="28"></span><strong>Fundamental I</strong><small>Alfabetização, matemática e ciências do 1º ao 5º ano</small><span class="card-link">Ver materiais →</span></button>
+          <button class="level-card" data-level="Fundamental II"><span class="level-icon tint-lilac"><img src="/assets/twemoji/1f52c.svg" alt="" aria-hidden="true" width="28" height="28"></span><strong>Fundamental II</strong><small>Conteúdos e atividades do 6º ao 9º ano</small><span class="card-link">Ver materiais →</span></button>
         </div>
       </div>
     </section>
 
     <section class="section" id="acervo">
       <div class="container"><div class="section-heading"><div><span class="eyebrow">MATERIAIS PARA SUA TURMA</span><h2>Loja de PDFs</h2><p>Pesquise pelo título ou tema e filtre pela etapa de ensino.</p></div><span class="count-pill" id="material-count">0 materiais</span></div>
-        <div class="filter-bar"><label class="search-field"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar por título ou tema" aria-label="Buscar materiais"></label><label class="filter-field">Etapa<select id="filter-level"><option value="">Todas as etapas</option><option>Educação Infantil</option><option>Fundamental I</option><option>Fundamental II</option><option>Ensino Médio</option><option>EJA</option><option>Outros</option></select></label><label class="filter-field">Tema<select id="filter-subject"><option value="">Todos os temas</option></select></label><button class="clear-button" id="clear-filters" type="button">Limpar filtros</button></div>
+        <div class="filter-bar"><label class="search-field"><span aria-hidden="true">⌕</span><input id="search" type="search" placeholder="Buscar por título ou tema" aria-label="Buscar materiais"></label><label class="filter-field">Etapa<select id="filter-level"><option value="">Todas as etapas</option><option>Educação Infantil</option><option>Fundamental I</option><option>Fundamental II</option></select></label><label class="filter-field">Tema<select id="filter-subject"><option value="">Todos os temas</option></select></label><button class="clear-button" id="clear-filters" type="button">Limpar filtros</button></div>
         <div class="material-grid" id="material-grid" aria-live="polite"></div>
         <div class="empty-state" id="empty-state"><span class="empty-icon">📂</span><h3>Novidades a caminho</h3><p>Os materiais aparecerão aqui assim que forem publicados.</p></div>
+        <section class="seasonal-section" id="seasonal-section" aria-labelledby="seasonal-title">
+          <div class="section-heading"><div><span class="eyebrow">INSPIRAÇÃO PARA SALA DE AULA</span><h2 id="seasonal-title"></h2><p id="seasonal-description"></p></div><button class="month-link" id="month-toggle" type="button"></button></div>
+          <div class="seasonal-grid" id="seasonal-grid" aria-live="polite"></div>
+        </section>
       </div>
     </section>
 
     <section class="section how section-mint" id="como-funciona"><div class="container"><span class="eyebrow">SIMPLES DE USAR</span><h2>Como comprar</h2><div class="steps"><div><span>1</span><h3>Escolha</h3><p>Encontre o material ideal para a etapa de ensino.</p></div><div><span>2</span><h3>Pague</h3><p>Finalize a compra com segurança na Stripe.</p></div><div><span>3</span><h3>Baixe</h3><p>Após a confirmação do pagamento, baixe seus PDFs.</p></div></div></div></section>
   </main>
-  <footer><div class="container footer-inner"><div class="brand">📚 Wonder<b>Learn</b><small>Materiais para aprender e ensinar</small></div><p>Materiais digitais para cada etapa da aprendizagem.</p><a href="/admin">Área do administrador</a></div></footer>
+  <footer><div class="container footer-inner"><a class="brand footer-logo" href="#inicio"><img src="brand-logo.png" alt="Pequenos Brincantes"></a><p>Materiais digitais para cada etapa da aprendizagem.</p><div class="footer-links"><a href="/account">Minha biblioteca</a><a href="/admin">Área do administrador</a></div></div></footer>
   <dialog id="cart-dialog"><div class="confirm-body"><button id="close-cart" class="cart-close" aria-label="Fechar">×</button><h2>Seu carrinho</h2><div id="cart-items"></div><p class="cart-total" id="cart-total"></p><p class="cart-message" id="cart-message" role="status"></p><button id="checkout-button" class="button button-green">Ir para o pagamento →</button></div></dialog>
   <dialog id="order-dialog"><div class="confirm-body"><h2 id="order-title">Seu pedido</h2><p id="order-message"></p><div id="order-downloads"></div><button id="close-order" class="button button-yellow">Fechar</button></div></dialog>
+  <dialog id="theme-alert-dialog"><form class="confirm-body theme-alert-form" id="theme-alert-form"><button id="close-theme-alert" type="button" class="cart-close" aria-label="Fechar">×</button><h2>Avise-me quando chegar</h2><p id="theme-alert-description"></p><input id="theme-alert-name" name="theme" type="hidden"><label for="theme-alert-contact">Seu e-mail ou WhatsApp</label><input id="theme-alert-contact" name="contact" type="text" autocomplete="email" maxlength="160" placeholder="nome@email.com ou (11) 99999-9999" required><small>Usaremos seu contato apenas para avisar quando houver material deste tema.</small><p class="theme-alert-message" id="theme-alert-message" role="status"></p><button class="button button-green" type="submit">Quero receber o aviso</button></form></dialog>
+  <dialog id="preview-dialog" class="preview-dialog" aria-labelledby="preview-title"><button class="preview-close" id="close-preview" type="button" aria-label="Fechar prévia">×</button><div class="preview-modal"><div class="preview-gallery"><div class="preview-stage" id="preview-stage"><img id="preview-modal-image" alt="Prévia da página do material" loading="lazy"><div class="preview-modal-placeholder" id="preview-modal-placeholder" hidden><span>▤</span></div></div><button class="preview-nav previous" id="preview-previous" type="button" aria-label="Página anterior">‹</button><button class="preview-nav next" id="preview-next" type="button" aria-label="Próxima página">›</button><span class="preview-page-indicator" id="preview-page-indicator"></span></div><div class="preview-details"><span class="material-level" id="preview-level"></span><h2 id="preview-title"></h2><p id="preview-description"></p><div class="preview-meta"><span id="preview-page-count"></span><span>Pronto para imprimir</span><strong id="preview-price"></strong></div><button class="button button-green" id="preview-action" type="button"></button></div></div></dialog>
   <script src="app.js"></script>
 </body></html>
-

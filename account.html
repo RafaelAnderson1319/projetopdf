@@ -1,0 +1,37 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f8f3df">
+  <title>Minha biblioteca | Pequenos Brincantes</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Baloo+2:wght@600;700;800&family=Nunito:wght@400;600;700;800;900&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="account.css">
+</head>
+<body class="account-page">
+  <header class="site-header account-header"><a class="brand brand-logo" href="/"><img src="brand-logo.png" alt="Pequenos Brincantes — Atividades Educativas"></a><a class="back-store" href="/">Voltar para a loja</a></header>
+  <main>
+    <section class="account-shell" id="auth-view">
+      <div class="auth-story"><img src="brand-logo.png" alt="" aria-hidden="true"><h1>Sua coleção de descobertas, sempre por perto.</h1><p>Entre para acessar todos os PDFs que você já comprou. Eles ficam guardados aqui para baixar quando quiser.</p><ul><li>Compras reunidas em um só lugar</li><li>Downloads protegidos pela sua conta</li><li>Acesso no computador ou celular</li></ul></div>
+      <div class="auth-panel">
+        <div class="auth-tabs" role="tablist" aria-label="Acesso à conta"><button class="active" id="login-tab" role="tab" aria-selected="true" aria-controls="login-form">Entrar</button><button id="register-tab" role="tab" aria-selected="false" aria-controls="register-form">Criar conta</button></div>
+        <form id="login-form" class="auth-form"><div><h2>Que bom ter você de volta</h2><p>Use o e-mail e a senha da sua conta.</p></div><label>E-mail<input name="email" type="email" autocomplete="email" required placeholder="voce@exemplo.com"></label><label>Senha<input name="password" type="password" autocomplete="current-password" minlength="8" required placeholder="Sua senha"></label><p class="form-status" id="login-status" role="status"></p><button class="button button-green" type="submit">Entrar na minha biblioteca</button></form>
+        <form id="register-form" class="auth-form" hidden><div><h2>Crie sua biblioteca</h2><p>Suas próximas compras serão salvas automaticamente.</p></div><label>Nome<input name="name" autocomplete="name" maxlength="80" required placeholder="Seu nome"></label><label>E-mail<input name="email" type="email" autocomplete="email" required placeholder="voce@exemplo.com"></label><label>Senha<input name="password" type="password" autocomplete="new-password" minlength="8" maxlength="128" required placeholder="Mínimo de 8 caracteres"><small>Use pelo menos 8 caracteres.</small></label><p class="form-status" id="register-status" role="status"></p><button class="button button-green" type="submit">Criar conta</button></form>
+        <div class="auth-social"><span>ou</span><button class="google-button" id="google-login" type="button"><svg aria-hidden="true" viewBox="0 0 48 48"><path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/><path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.91c-.58 2.96-2.26 5.48-4.76 7.18l7.73 6c4.51-4.18 7.1-10.33 7.1-17.65z"/><path fill="#FBBC05" d="M10.53 28.59A14.4 14.4 0 0 1 9.75 24c0-1.59.27-3.13.75-4.59l-7.98-6.19A23.9 23.9 0 0 0 0 24c0 3.87.93 7.53 2.56 10.78l7.97-6.19z"/><path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.9-5.8l-7.73-6c-2.14 1.44-4.89 2.3-8.17 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/></svg>Continuar com Google</button></div>
+      </div>
+    </section>
+
+    <section class="library-shell" id="library-view" hidden>
+      <header class="library-heading"><div><p id="welcome-name"></p><h1>Minha biblioteca</h1><span>Seus materiais pagos ficam disponíveis aqui, sempre que precisar.</span></div><div class="library-actions"><a class="button button-yellow" href="/#acervo">Buscar novos materiais</a><button class="button button-outline" id="logout-button">Sair</button></div></header>
+      <div class="payment-notice" id="payment-notice" hidden role="status"><strong>Pagamento recebido.</strong><span>Estamos atualizando sua biblioteca. Se a confirmação ainda estiver pendente, ela aparecerá em instantes.</span></div>
+      <div class="library-summary"><div><span>Materiais disponíveis</span><strong id="material-total">0</strong></div><p>Acesse seus arquivos sem procurar links antigos.</p></div>
+      <div id="library-list" class="library-list" aria-live="polite"></div>
+      <div id="library-empty" class="library-empty" hidden><span>PB</span><h2>Sua biblioteca está pronta</h2><p>Quando você comprar um material, ele aparecerá aqui.</p><a class="button button-green" href="/#acervo">Conhecer os materiais</a></div>
+    </section>
+  </main>
+  <script src="account.js"></script>
+</body>
+</html>
