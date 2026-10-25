@@ -38,11 +38,11 @@
     },
     {
       "source": "/api/:path*",
-      "destination": "/api/dispatch?__path=/api/:path*"
+      "destination": "/api/dispatch.js?__path=/api/:path*"
     },
     {
       "source": "/auth/:path*",
-      "destination": "/api/dispatch?__path=/auth/:path*"
+      "destination": "/api/dispatch.js?__path=/auth/:path*"
     }
   ]
 }
