@@ -5,7 +5,7 @@
   "description": "Loja Pequenos Brincantes com biblioteca de PDFs, painel administrativo e checkout Stripe",
   "scripts": {
     "start": "node server.cjs",
-    "check": "node --check server.cjs && node --check public/app.js && node --check public/account.js && node --check public/admin.js",
+    "check": "node --check server.cjs && node --check assets/app.js && node --check assets/account.js && node --check assets/admin.js",
     "test": "node test.cjs"
   },
   "engines": {

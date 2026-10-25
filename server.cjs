@@ -36,7 +36,7 @@ const assets={
   '/':'index.html','/index.html':'index.html','/account':'account.html','/account.html':'account.html',
   '/admin':'admin.html','/admin.html':'admin.html','/style.css':'style.css','/account.css':'account.css',
   '/admin.css':'admin.css','/hero.jpg':'hero.jpg','/brand-logo.png':'brand-logo.png',
-  '/app.js':'public/app.js','/account.js':'public/account.js','/admin.js':'public/admin.js',
+  '/assets/app.js':'assets/app.js','/assets/account.js':'assets/account.js','/assets/admin.js':'assets/admin.js',
   '/assets/twemoji/1f9e9.svg':'assets/twemoji/1f9e9.svg','/assets/twemoji/270f.svg':'assets/twemoji/270f.svg',
   '/assets/twemoji/1f52c.svg':'assets/twemoji/1f52c.svg','/assets/twemoji/1f393.svg':'assets/twemoji/1f393.svg',
   '/assets/twemoji/1f4d6.svg':'assets/twemoji/1f4d6.svg','/assets/twemoji/1f392.svg':'assets/twemoji/1f392.svg'

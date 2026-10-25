@@ -2,13 +2,24 @@
   "$schema": "https://openapi.vercel.sh/vercel.json",
   "rewrites": [
     {
-      "source": "/(.*)",
-      "destination": "/api/dispatch?__path=/$1"
+      "source": "/account",
+      "destination": "/account.html"
+    },
+    {
+      "source": "/admin",
+      "destination": "/admin.html"
+    },
+    {
+      "source": "/api/:path*",
+      "destination": "/api/dispatch?__path=/api/:path*"
+    },
+    {
+      "source": "/auth/:path*",
+      "destination": "/api/dispatch?__path=/auth/:path*"
     }
   ],
   "functions": {
     "api/dispatch.js": {
-      "includeFiles": "{*.html,*.css,*.png,*.jpg,public/**,assets/**}",
       "maxDuration": 60
     }
   }
