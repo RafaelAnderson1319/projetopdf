@@ -8,7 +8,7 @@
   ],
   "functions": {
     "api/dispatch.js": {
-      "includeFiles": "{*.html,*.css,*.js,*.png,*.jpg,assets/**}",
+      "includeFiles": "{*.html,*.css,*.png,*.jpg,public/**,assets/**}",
       "maxDuration": 60
     }
   }
