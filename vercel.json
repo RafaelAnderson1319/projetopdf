@@ -3,7 +3,7 @@
   "framework": null,
   "builds": [
     {
-      "src": "*.html",
+      "src": "@(index|account|dashboard).html",
       "use": "@vercel/static"
     },
     {
@@ -19,12 +19,16 @@
       "use": "@vercel/static"
     },
     {
-      "src": "assets/**/*",
+      "src": "assets/@(app|account|dashboard).js",
       "use": "@vercel/static"
     },
     {
       "src": "api/dispatch.js",
       "use": "@vercel/node"
+    },
+    {
+      "src": "assets/twemoji/*.svg",
+      "use": "@vercel/static"
     }
   ],
   "rewrites": [
@@ -33,8 +37,8 @@
       "destination": "/account.html"
     },
     {
-      "source": "/admin",
-      "destination": "/admin.html"
+      "source": "/dashboard",
+      "destination": "/dashboard.html"
     },
     {
       "source": "/api/:path*",

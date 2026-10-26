@@ -8,10 +8,11 @@ const data=fs.mkdtempSync(path.join(os.tmpdir(),'pequenos-brincantes-'));
 const port=35000+Math.floor(Math.random()*5000);
 const base=`http://127.0.0.1:${port}`;
 const child=spawn(process.execPath,['server.cjs'],{cwd:__dirname,env:{...process.env,PORT:String(port),WONDERLEARN_DATA:data},stdio:['ignore','pipe','pipe']});
+let childErrors='';child.stderr.on('data',chunk=>{childErrors+=chunk.toString()});
 const cookieFrom=response=>(response.headers.get('set-cookie')||'').split(';')[0];
 const request=(route,options={})=>fetch(base+route,options);
 
-async function waitForServer(){for(let attempt=0;attempt<40;attempt++){try{const response=await request('/api/account/session');if(response.ok)return}catch{}await new Promise(resolve=>setTimeout(resolve,100))}throw new Error('O servidor de teste não iniciou')}
+async function waitForServer(){for(let attempt=0;attempt<150;attempt++){try{const response=await request('/api/account/session');if(response.ok)return}catch{}await new Promise(resolve=>setTimeout(resolve,100))}throw new Error('O servidor de teste não iniciou: '+childErrors.slice(-3000))}
 
 (async()=>{try{
   await waitForServer();

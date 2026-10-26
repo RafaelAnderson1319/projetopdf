@@ -30,13 +30,13 @@ const userSessions=new Map();
 const stripeKey=process.env.STRIPE_SECRET_KEY||'';
 const webhookSecret=process.env.STRIPE_WEBHOOK_SECRET||'';
 const supabaseUrl=process.env.SUPABASE_URL||'';
-const supabaseServiceRoleKey=process.env.SUPABASE_SERVICE_ROLE_KEY||'';
+const supabaseServiceRoleKey=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY||'';
 const supabaseAuthApiKey=process.env.SUPABASE_ANON_KEY||process.env.SUPABASE_PUBLISHABLE_KEY||supabaseServiceRoleKey;
 const assets={
   '/':'index.html','/index.html':'index.html','/account':'account.html','/account.html':'account.html',
-  '/admin':'admin.html','/admin.html':'admin.html','/style.css':'style.css','/account.css':'account.css',
+  '/dashboard':'dashboard.html','/dashboard.html':'dashboard.html','/style.css':'style.css','/account.css':'account.css',
   '/admin.css':'admin.css','/hero.jpg':'hero.jpg','/brand-logo.png':'brand-logo.png',
-  '/assets/app.js':'assets/app.js','/assets/account.js':'assets/account.js','/assets/admin.js':'assets/admin.js',
+  '/assets/app.js':'assets/app.js','/assets/account.js':'assets/account.js','/assets/dashboard.js':'assets/dashboard.js',
   '/assets/twemoji/1f9e9.svg':'assets/twemoji/1f9e9.svg','/assets/twemoji/270f.svg':'assets/twemoji/270f.svg',
   '/assets/twemoji/1f52c.svg':'assets/twemoji/1f52c.svg','/assets/twemoji/1f393.svg':'assets/twemoji/1f393.svg',
   '/assets/twemoji/1f4d6.svg':'assets/twemoji/1f4d6.svg','/assets/twemoji/1f392.svg':'assets/twemoji/1f392.svg'
@@ -123,15 +123,25 @@ async function archiveRemoteMaterial(id){if(!supabaseUrl||!supabaseServiceRoleKe
 async function removeStoredPreviews(id,count){if(!supabaseUrl||!supabaseServiceRoleKey)return;for(let index=0;index<count;index++){const endpoint=`${supabaseUrl.replace(/\/$/,'')}/storage/v1/object/pdf-previews/${id}/${index+1}.webp`;try{await fetch(endpoint,{method:'DELETE',headers:{apikey:supabaseServiceRoleKey,Authorization:`Bearer ${supabaseServiceRoleKey}`}})}catch{}}}
 async function googleProviderEnabled(){if(!supabaseUrl||!supabaseAuthApiKey)return false;try{const response=await fetch(`${supabaseUrl.replace(/\/$/,'')}/auth/v1/settings`,{headers:{apikey:supabaseAuthApiKey}});if(!response.ok)return false;const settings=await response.json();return settings.external?.google===true}catch{return false}}
 
+const cloudStore=supabaseUrl&&supabaseServiceRoleKey?require('./cloud-store.cjs')({
+  base:supabaseUrl.replace(/\/$/,''),secret:supabaseServiceRoleKey,authKey:supabaseAuthApiKey,
+  send,body,json,cookies,sessionCookie,publicProduct,renderPdfPreviews,storePreview,
+  stripeSession,stripeStatus,verifiedWebhook,stripeReady:!!stripeKey,webhookReady:!!webhookSecret,
+  adminPassword:process.env.WONDERLEARN_ADMIN_PASSWORD||'',safeEqual,publicBase:(process.env.PUBLIC_BASE_URL||'http://localhost:3000').replace(/\/$/,'')
+}):null;
+
 async function handleRequest(req,res){try{
   const url=new URL(req.url,origin(req)),route=url.pathname,method=req.method;
+  if(['/admin','/admin.html','/assets/admin.js'].includes(route))return send(res,404,{error:'Não encontrado'});
+  if(process.env.VERCEL&&!cloudStore&&(route.startsWith('/api/')||route.startsWith('/auth/')))return send(res,503,{error:'Configure as variáveis do Supabase no servidor para ativar a loja.'});
+  if(cloudStore&&await cloudStore(req,res,route,method))return;
   if(route==='/api/account/google/config'&&method==='GET')return send(res,200,{enabled:await googleProviderEnabled()});
   if(route==='/auth/google'&&method==='GET'){
     if(!await googleProviderEnabled())return send(res,503,{error:'O provedor Google ainda não está ativado no Supabase.'});
-    const authorization=new URL('/auth/v1/authorize',supabaseUrl);authorization.searchParams.set('provider','google');authorization.searchParams.set('redirect_to',`${origin(req)}/account`);authorization.searchParams.set('flow_type','implicit');
+    const authorization=new URL('/auth/v1/authorize',supabaseUrl);authorization.searchParams.set('provider','google');authorization.searchParams.set('redirect_to',`${origin(req)}/${url.searchParams.get('retorno')==='dashboard'?'dashboard':'account'}`);authorization.searchParams.set('flow_type','implicit');
     res.writeHead(302,{Location:authorization.toString(),'Cache-Control':'no-store','Referrer-Policy':'no-referrer'});return res.end();
   }
-  if(route==='/api/account/google'&&method==='POST'){
+  if(['/api/account/google','/api/account/token'].includes(route)&&method==='POST'){
     if(!supabaseUrl||!supabaseAuthApiKey)return send(res,503,{error:'Login Google ainda não configurado.'});
     const token=String(req.headers.authorization||'').replace(/^Bearer\s+/i,'');if(token.length<20||token.length>8192)return send(res,401,{error:'Sessão Google inválida'});
     let response;try{response=await fetch(`${supabaseUrl.replace(/\/$/,'')}/auth/v1/user`,{headers:{apikey:supabaseAuthApiKey,Authorization:`Bearer ${token}`}})}catch{return send(res,502,{error:'Não foi possível validar sua conta Google.'})}
