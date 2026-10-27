@@ -152,7 +152,7 @@ module.exports = function createCloudStore(options) {
       await requireAdmin(req);
       const fromDrive=route.endsWith('/import');
       const meta = fromDrive?json(await body(req)):json(Buffer.from(decodeURIComponent(String(req.headers['x-product-meta'] || '%7B%7D')))), price = Math.round(Number(meta.price) * 100);
-      if (!meta.title || !meta.level || !meta.subject || !Number.isSafeInteger(price) || price < 0 || price > 10000000) throw error('Preencha os dados e informe um preço válido.', 400);
+      if (!meta.title || !meta.level || !Number.isSafeInteger(price) || price < 0 || price > 10000000) throw error('Preencha os dados e informe um preço válido.', 400);
       if(fromDrive&&!/^[A-Za-z0-9_-]{20,100}$/.test(meta.driveId||''))throw error('Link do Google Drive inválido.',400);
       const id=fromDrive?crypto.createHash('sha256').update('pequenos-drive:'+meta.driveId).digest('hex').slice(0,32).replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/,'$1-$2-$3-$4-$5'):crypto.randomUUID();
       if(fromDrive){const existing=(await products(`&id=eq.${id}`))[0];if(existing){send(res,200,publicProduct(existing));return true;}}
@@ -165,7 +165,7 @@ module.exports = function createCloudStore(options) {
       await storage(`${id}.pdf`, 'POST', file,fromDrive);
       for (let index = 0; index < rendered.previews.length; index++) previews.push(await storePreview(id, index, rendered.previews[index]));
       const row = {id, titulo: String(meta.title).trim().slice(0, 100), descricao: String(meta.description || '').slice(0, 300),
-        preco_centavos: price, nivel: String(meta.level).slice(0, 60), tema: String(meta.subject).slice(0, 60), ano: String(meta.grade || '').slice(0, 40),
+        preco_centavos: price, nivel: String(meta.level).slice(0, 60), tema: String(meta.subject || meta.title).replace(/^atividades?\s*(?:do |da |de |dos |das )?/i,'').slice(0, 60), ano: String(meta.grade || '').slice(0, 40),
         pdf_path: `${id}.pdf`, capa_url:previews[0]||null, preview_urls: previews, page_count: rendered.pageCount, ativo: true};
       if(ensureStripeProduct)Object.assign(row,await ensureStripeProduct({id,title:row.titulo,description:row.descricao,price},fromDrive?meta.driveId:null));
       const saved = await rest('products', {method: 'POST', data: row, prefer: 'return=representation'});
