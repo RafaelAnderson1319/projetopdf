@@ -7,6 +7,15 @@ async function loadDashboard(state){const [products,orders]=await Promise.all([a
 $('#logout').onclick=async()=>{await api('/api/admin/logout',{method:'POST'});await session()};
 function titleFromFilename(name){return String(name).replace(/\.pdf$/i,'').replace(/\s*[–—-]\s*\d{1,2}\s+[A-Za-zÀ-ÿ]+\s+\d{4}.*$/,'').replace(/[_]+/g,' ').trim().slice(0,100)}
 const fileInput=$('#product-file');fileInput.onchange=()=>{const file=fileInput.files[0];$('#selected-file').textContent=file?.name||'Escolher PDF';if(file)$('#product-form [name="title"]').value=titleFromFilename(file.name)};
+let driveTitleTimer,driveTitleRequest=0;
+$('#drive-link').addEventListener('input',()=>{
+ clearTimeout(driveTitleTimer);const request=++driveTitleRequest,link=$('#drive-link').value.trim();
+ driveTitleTimer=setTimeout(async()=>{
+  let id;try{const url=new URL(link);if(url.protocol!=='https:'||url.hostname!=='drive.google.com')return;id=url.pathname.match(/^\/file\/d\/([A-Za-z0-9_-]{20,100})(?:\/|$)/)?.[1]||url.searchParams.get('id');if(!/^[A-Za-z0-9_-]{20,100}$/.test(id||''))return;}catch{return}
+  const title=$('#product-form [name="title"]'),before=title.value,status=$('#upload-status');status.textContent='Buscando título do PDF no Drive...';
+  try{const data=await api('/api/admin/drive-title',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({driveId:id})});if(request!==driveTitleRequest)return;if(title.value===before)title.value=titleFromFilename(data.title);status.textContent='';}catch(error){if(request===driveTitleRequest)status.textContent=error.message;}
+ },400);
+});
 $('#product-form').onsubmit=async e=>{
  e.preventDefault();const form=e.currentTarget,file=fileInput.files[0],status=$('#upload-status'),button=$('#publish-button'),link=$('#drive-link').value.trim();
  let driveId;

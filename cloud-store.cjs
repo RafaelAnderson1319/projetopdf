@@ -147,6 +147,11 @@ module.exports = function createCloudStore(options) {
     if (route === '/api/admin/session' && method === 'GET') {send(res, 200, {authenticated: !!await isAdmin(req), signedIn: !!await currentUser(req), stripeReady, webhookReady}); return true;}
     if (route === '/api/admin/login' && method === 'POST') throw error('Entre com a conta Google autorizada.', 405);
     if (route === '/api/admin/logout' && method === 'POST') {send(res, 200, {ok: true}, {'Set-Cookie': await endSession(req)}); return true;}
+    if (route === '/api/admin/drive-title' && method === 'POST') {
+      await requireAdmin(req);
+      const input=json(await body(req));
+      send(res,200,{title:await require('./drive-title.cjs')(input.driveId)});return true;
+    }
     if (route === '/api/admin/products' && method === 'GET') {await requireAdmin(req); send(res, 200, (await products()).map(publicProduct)); return true;}
     if (['/api/admin/products','/api/admin/products/import'].includes(route) && method === 'POST') {
       await requireAdmin(req);
