@@ -38,7 +38,7 @@ Cadastre na Stripe um webhook para https://pequenosbrincantes.vercel.app/api/str
 
 Publique o código atualizado depois de salvar as variáveis. Deployments antigos não recebem as novas variáveis automaticamente.
 
-Teste uma compra em modo de teste: cadastre um PDF em /dashboard, crie uma conta, compre, confira a entrega do webhook e baixe em /account. Saia e entre novamente para conferir a persistência. Outra conta deve permanecer sem acesso ao arquivo.
+Teste uma compra em modo de teste: cadastre um PDF em /painel_admin, crie uma conta, compre, confira a entrega do webhook e baixe em /account. Saia e entre novamente para conferir a persistência. Outra conta deve permanecer sem acesso ao arquivo.
 
 Os testes locais e SQL passaram; pagamento Stripe, e-mail, Google e deploy ainda precisam de validação com essas configurações.
 

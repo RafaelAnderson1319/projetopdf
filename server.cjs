@@ -40,7 +40,7 @@ const assets={
   '/textura_formas.png':'textura_formas.png','/textura_educativa.png':'textura_educativa.png',
   '/textura_papel.png':'textura_papel.png','/textura_rabiscos.png':'textura_rabiscos.png',
   '/':'index.html','/index.html':'index.html','/account':'account.html','/account.html':'account.html',
-  '/dashboard':'dashboard.html','/dashboard.html':'dashboard.html','/style.css':'style.css','/account.css':'account.css',
+  '/painel_admin':'painel_admin.html','/painel_admin.html':'painel_admin.html','/style.css':'style.css','/account.css':'account.css',
   '/admin.css':'admin.css','/hero.jpg':'hero.jpg','/brand-logo.png':'brand-logo.png',
   '/assets/app.js':'assets/app.js','/assets/account.js':'assets/account.js','/assets/dashboard.js':'assets/dashboard.js',
   '/assets/twemoji/1f9e9.svg':'assets/twemoji/1f9e9.svg','/assets/twemoji/270f.svg':'assets/twemoji/270f.svg',
@@ -161,7 +161,7 @@ async function handleRequest(req,res){try{
   if(route==='/api/account/google/config'&&method==='GET')return send(res,200,{enabled:await googleProviderEnabled()});
   if(route==='/auth/google'&&method==='GET'){
     if(!await googleProviderEnabled())return send(res,503,{error:'O provedor Google ainda não está ativado no Supabase.'});
-    const authorization=new URL('/auth/v1/authorize',supabaseUrl);authorization.searchParams.set('provider','google');authorization.searchParams.set('redirect_to',`${origin(req)}/${url.searchParams.get('retorno')==='dashboard'?'dashboard':'account'}`);authorization.searchParams.set('flow_type','implicit');
+    const authorization=new URL('/auth/v1/authorize',supabaseUrl);authorization.searchParams.set('provider','google');authorization.searchParams.set('redirect_to',`${origin(req)}/${url.searchParams.get('retorno')==='painel_admin'?'painel_admin':'account'}`);authorization.searchParams.set('flow_type','implicit');
     res.writeHead(302,{Location:authorization.toString(),'Cache-Control':'no-store','Referrer-Policy':'no-referrer'});return res.end();
   }
   if(['/api/account/google','/api/account/token'].includes(route)&&method==='POST'){

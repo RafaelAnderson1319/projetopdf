@@ -3,7 +3,7 @@
   "framework": null,
   "builds": [
     {
-      "src": "@(index|account|dashboard).html",
+      "src": "@(index|account|painel_admin).html",
       "use": "@vercel/static"
     },
     {
@@ -37,8 +37,8 @@
       "destination": "/account.html"
     },
     {
-      "source": "/dashboard",
-      "destination": "/dashboard.html"
+      "source": "/painel_admin",
+      "destination": "/painel_admin.html"
     },
     {
       "source": "/api/:path*",

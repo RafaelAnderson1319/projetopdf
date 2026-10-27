@@ -10,9 +10,9 @@ Requer Node.js 20 ou superior. Na pasta do projeto, execute:
 npm start
 ```
 
-Abra `http://localhost:3000`. A área do cliente fica em `/account` e o painel administrativo em `/dashboard`.
+Abra `http://localhost:3000`. A área do cliente fica em `/account` e o painel administrativo em `/painel_admin`.
 
-A senha inicial do painel é criada na primeira execução e mostrada no terminal. Ela também fica em `private/dashboard.json`, que não deve ser enviado ao GitHub. Para definir outra senha, configure `WONDERLEARN_ADMIN_PASSWORD (somente desenvolvimento local)` antes de iniciar o servidor.
+A senha inicial do painel é criada na primeira execução e mostrada no terminal. Ela também fica em `private/painel_admin.json`, que não deve ser enviado ao GitHub. Para definir outra senha, configure `WONDERLEARN_ADMIN_PASSWORD (somente desenvolvimento local)` antes de iniciar o servidor.
 
 ## Contas e biblioteca
 
