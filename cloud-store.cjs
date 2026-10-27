@@ -160,7 +160,7 @@ module.exports = function createCloudStore(options) {
       const file = fromDrive?await require('./drive-import.cjs')(meta.driveId):await body(req, 30 * 1024 * 1024);
       if (file.subarray(0, 5).toString() !== '%PDF-') throw error('Arquivo PDF inválido.', 400);
       let rendered;
-      try {rendered = await renderPdfPreviews(file);} catch {throw error('Não foi possível ler este PDF.', 400);}
+      try {rendered = await renderPdfPreviews(file);} catch (cause) {console.error('PDF preview failed:',cause);throw error('Não foi possível ler este PDF.', 400);}
       const previews = [];
       await storage(`${id}.pdf`, 'POST', file,fromDrive);
       for (let index = 0; index < rendered.previews.length; index++) previews.push(await storePreview(id, index, rendered.previews[index]));

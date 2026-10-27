@@ -6,7 +6,8 @@ const {createCanvas,DOMMatrix,ImageData,Path2D}=require('@napi-rs/canvas');
 globalThis.DOMMatrix??=DOMMatrix;
 globalThis.ImageData??=ImageData;
 globalThis.Path2D??=Path2D;
-const pdfjsPromise=import('pdfjs-dist/legacy/build/pdf.mjs');
+// Import the worker explicitly so serverless file tracing includes it.
+const pdfjsPromise=Promise.all([import('pdfjs-dist/legacy/build/pdf.mjs'),import('pdfjs-dist/legacy/build/pdf.worker.mjs')]).then(([pdfjs,worker])=>{globalThis.pdfjsWorker=worker;return pdfjs});
 
 const ROOT=process.env.WONDERLEARN_ROOT||__dirname;
 if(fs.existsSync(path.join(ROOT,'.env'))){for(const line of fs.readFileSync(path.join(ROOT,'.env'),'utf8').split(/\r?\n/)){const match=line.match(/^\s*([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(.*?)\s*$/);if(match&&process.env[match[1]]===undefined)process.env[match[1]]=match[2].replace(/^(["'])(.*)\1$/,'$2')}}
