@@ -23,7 +23,7 @@ fs.mkdirSync(PREVIEW_DIR,{recursive:true});
 
 const readJson=(file,fallback)=>{try{return JSON.parse(fs.readFileSync(file,'utf8'))}catch{return fallback}};
 const writeJson=(file,value)=>{const tmp=file+'.tmp';fs.writeFileSync(tmp,JSON.stringify(value,null,2));fs.renameSync(tmp,file)};
-if(!fs.existsSync(ADMIN_FILE)){const password=crypto.randomBytes(12).toString('base64url');writeJson(ADMIN_FILE,{password});console.log('Senha inicial do administrador:',password)}
+if(!fs.existsSync(ADMIN_FILE)){const password=crypto.randomBytes(12).toString('base64url');writeJson(ADMIN_FILE,{password});if(!process.env.VERCEL)console.log('Senha inicial do administrador:',password)}
 
 const adminPassword=process.env.WONDERLEARN_ADMIN_PASSWORD||readJson(ADMIN_FILE,{}).password;
 const adminSessions=new Set();

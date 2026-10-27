@@ -20,6 +20,7 @@ async function showLibrary(){
   $('#auth-view').hidden=true;$('#library-view').hidden=false;$('#welcome-name').textContent=`Olá, ${session.user.name.split(' ')[0]}`;
   if(params.get('pagamento')==='sucesso'){$('#payment-notice').hidden=false;localStorage.removeItem('pequenos-cart');localStorage.removeItem('wonderlearn-cart')}
   const {orders}=await api('/api/account/library'),paid=orders.filter(order=>order.status==='pago'),pending=orders.filter(order=>order.status!=='pago');
+  if(params.get('pagamento')==='sucesso'&&!pending.length&&paid.length){$('#payment-notice strong').textContent='Pagamento confirmado.';$('#payment-notice span').textContent='Seus materiais estão disponíveis para baixar abaixo.'}
   const available=paid.reduce((total,order)=>total+order.items.filter(item=>item.available).length,0);$('#material-total').textContent=available;
   const list=$('#library-list'),empty=$('#library-empty');empty.hidden=orders.length>0;
   const pendingHtml=pending.map(order=>`<article class="order-group pending"><header><div><span>Confirmação em andamento</span><strong>Pedido ${safe(order.id.slice(0,8))}</strong></div><time>${date(order.created)}</time></header><p>Assim que o pagamento for confirmado, os downloads aparecerão aqui automaticamente.</p></article>`).join('');
