@@ -34,6 +34,10 @@ const supabaseUrl=process.env.SUPABASE_URL||'';
 const supabaseServiceRoleKey=process.env.SUPABASE_SECRET_KEY||process.env.SUPABASE_SERVICE_ROLE_KEY||'';
 const supabaseAuthApiKey=process.env.SUPABASE_ANON_KEY||process.env.SUPABASE_PUBLISHABLE_KEY||supabaseServiceRoleKey;
 const assets={
+  '/icone-infantil.png':'icone-infantil.png','/icone-fundamental-i.png':'icone-fundamental-i.png',
+  '/icone-fundamental-ii.png':'icone-fundamental-ii.png',
+  '/textura_formas.png':'textura_formas.png','/textura_educativa.png':'textura_educativa.png',
+  '/textura_papel.png':'textura_papel.png','/textura_rabiscos.png':'textura_rabiscos.png',
   '/':'index.html','/index.html':'index.html','/account':'account.html','/account.html':'account.html',
   '/dashboard':'dashboard.html','/dashboard.html':'dashboard.html','/style.css':'style.css','/account.css':'account.css',
   '/admin.css':'admin.css','/hero.jpg':'hero.jpg','/brand-logo.png':'brand-logo.png',
