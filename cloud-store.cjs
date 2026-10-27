@@ -5,7 +5,7 @@ const {Readable} = require('node:stream');
 // to the browser. Local development without Supabase still uses server.cjs.
 module.exports = function createCloudStore(options) {
   const {base, secret, authKey, send, body, json, cookies, sessionCookie,
-    publicProduct, renderPdfPreviews, storePreview, stripeSession, stripeStatus,
+    publicProduct, renderPdfPreviews, storePreview, stripeSession, stripeStatus, ensureStripeProduct,
     verifiedWebhook, stripeReady, webhookReady, adminPassword, safeEqual, publicBase} = options;
   const headers = {apikey: secret, Authorization: `Bearer ${secret}`};
   const error = (message, status = 502) => Object.assign(new Error(message), {status});
@@ -82,7 +82,7 @@ module.exports = function createCloudStore(options) {
   function product(row) {
     return {id: row.id, title: row.titulo, description: row.descricao, price: row.preco_centavos,
       level: row.nivel, subject: row.tema, grade: row.ano, active: row.ativo,
-      created: Date.parse(row.created_at), previewUrls: row.preview_urls, pageCount: row.page_count, pdfPath: row.pdf_path};
+      created: Date.parse(row.created_at), previewUrls: row.preview_urls, pageCount: row.page_count, pdfPath: row.pdf_path, stripePriceId:row.stripe_price_id};
   }
   async function products(filter = '') {return (await rest(`products?select=*&order=created_at.desc${filter}`)).map(product);}
   function order(row) {
@@ -99,9 +99,9 @@ module.exports = function createCloudStore(options) {
       p_payment_intent: typeof session.payment_intent === 'string' ? session.payment_intent : null
     }});
   }
-  async function storage(path, method = 'GET', file) {
+  async function storage(path, method = 'GET', file, upsert = false) {
     const response = await fetch(`${base}/storage/v1/object/${method === 'GET' ? 'authenticated/' : ''}pdfs/${path.split('/').map(encodeURIComponent).join('/')}`, {
-      method, headers: {...headers, ...(file ? {'Content-Type': 'application/pdf', 'x-upsert': 'false'} : {})}, body: file
+      method, headers: {...headers, ...(file ? {'Content-Type': 'application/pdf', 'x-upsert': String(upsert)} : {})}, body: file
     });
     if (!response.ok) throw error('Arquivo indisponível. Tente novamente.', response.status === 404 ? 404 : 502);
     return response;
@@ -148,21 +148,26 @@ module.exports = function createCloudStore(options) {
     if (route === '/api/admin/login' && method === 'POST') throw error('Entre com a conta Google autorizada.', 405);
     if (route === '/api/admin/logout' && method === 'POST') {send(res, 200, {ok: true}, {'Set-Cookie': await endSession(req)}); return true;}
     if (route === '/api/admin/products' && method === 'GET') {await requireAdmin(req); send(res, 200, (await products()).map(publicProduct)); return true;}
-    if (route === '/api/admin/products' && method === 'POST') {
+    if (['/api/admin/products','/api/admin/products/import'].includes(route) && method === 'POST') {
       await requireAdmin(req);
-      const meta = json(Buffer.from(decodeURIComponent(String(req.headers['x-product-meta'] || '%7B%7D')))), price = Math.round(Number(meta.price) * 100);
+      const fromDrive=route.endsWith('/import');
+      const meta = fromDrive?json(await body(req)):json(Buffer.from(decodeURIComponent(String(req.headers['x-product-meta'] || '%7B%7D')))), price = Math.round(Number(meta.price) * 100);
       if (!meta.title || !meta.level || !meta.subject || !Number.isSafeInteger(price) || price < 0 || price > 10000000) throw error('Preencha os dados e informe um preço válido.', 400);
-      if (req.headers['content-type'] !== 'application/pdf') throw error('Envie um arquivo PDF.', 400);
-      const file = await body(req, 30 * 1024 * 1024);
+      if(fromDrive&&!/^[A-Za-z0-9_-]{20,100}$/.test(meta.driveId||''))throw error('Link do Google Drive inválido.',400);
+      const id=fromDrive?crypto.createHash('sha256').update('pequenos-drive:'+meta.driveId).digest('hex').slice(0,32).replace(/^(.{8})(.{4})(.{4})(.{4})(.{12})$/,'$1-$2-$3-$4-$5'):crypto.randomUUID();
+      if(fromDrive){const existing=(await products(`&id=eq.${id}`))[0];if(existing){send(res,200,publicProduct(existing));return true;}}
+      if (!fromDrive&&req.headers['content-type'] !== 'application/pdf') throw error('Envie um arquivo PDF.', 400);
+      const file = fromDrive?await require('./drive-import.cjs')(meta.driveId):await body(req, 30 * 1024 * 1024);
       if (file.subarray(0, 5).toString() !== '%PDF-') throw error('Arquivo PDF inválido.', 400);
       let rendered;
       try {rendered = await renderPdfPreviews(file);} catch {throw error('Não foi possível ler este PDF.', 400);}
-      const id = crypto.randomUUID(), previews = [];
-      await storage(`${id}.pdf`, 'POST', file);
+      const previews = [];
+      await storage(`${id}.pdf`, 'POST', file,fromDrive);
       for (let index = 0; index < rendered.previews.length; index++) previews.push(await storePreview(id, index, rendered.previews[index]));
       const row = {id, titulo: String(meta.title).trim().slice(0, 100), descricao: String(meta.description || '').slice(0, 300),
         preco_centavos: price, nivel: String(meta.level).slice(0, 60), tema: String(meta.subject).slice(0, 60), ano: String(meta.grade || '').slice(0, 40),
-        pdf_path: `${id}.pdf`, preview_urls: previews, page_count: rendered.pageCount, ativo: true};
+        pdf_path: `${id}.pdf`, capa_url:previews[0]||null, preview_urls: previews, page_count: rendered.pageCount, ativo: true};
+      if(ensureStripeProduct)Object.assign(row,await ensureStripeProduct({id,title:row.titulo,description:row.descricao,price},fromDrive?meta.driveId:null));
       const saved = await rest('products', {method: 'POST', data: row, prefer: 'return=representation'});
       send(res, 201, publicProduct(product(saved[0]))); return true;
     }

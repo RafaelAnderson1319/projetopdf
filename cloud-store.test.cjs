@@ -68,6 +68,11 @@ test('a customer session works across application instances and logout revokes i
   await request('/api/account/logout', {handler: one, method: 'POST'});
   assert.equal((await request('/api/account/session', {handler: two})).json.authenticated, false);
 });
+test('Drive imports require the verified Google administrator before reading input or fetching files',async t=>{
+ const {request}=setup(t);
+ await assert.rejects(request('/api/admin/products/import',{method:'POST',token:'bob',input:{driveId:'1xphoOm5t4WxUNX_8AyXjZ_DBciG4Ezs2'}}),{status:403});
+ await assert.rejects(request('/api/admin/products/import',{method:'POST',token:'',input:{}}),{status:403});
+});
 test('only the buyer sees a paid PDF, including archived products', async t => {
   const {db, request} = setup(t);
   db.products[0].ativo = false;

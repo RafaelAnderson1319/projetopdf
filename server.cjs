@@ -74,20 +74,37 @@ async function stripeSession(order,items,req){
   params.set('customer_email',order.email);
   params.set('metadata[order_id]',order.id);
   params.set('metadata[user_id]',order.userId);
-  items.forEach((p,i)=>{params.set(`line_items[${i}][price_data][currency]`,'brl');params.set(`line_items[${i}][price_data][unit_amount]`,String(p.price));params.set(`line_items[${i}][price_data][product_data][name]`,p.title);params.set(`line_items[${i}][quantity]`,'1')});
+  items.forEach((p,i)=>{if(p.stripePriceId)params.set(`line_items[${i}][price]`,p.stripePriceId);else{params.set(`line_items[${i}][price_data][currency]`,'brl');params.set(`line_items[${i}][price_data][unit_amount]`,String(p.price));params.set(`line_items[${i}][price_data][product_data][name]`,p.title)}params.set(`line_items[${i}][quantity]`,'1')});
   const response=await fetch('https://api.stripe.com/v1/checkout/sessions',{method:'POST',headers:{Authorization:`Bearer ${stripeKey}`,'Content-Type':'application/x-www-form-urlencoded'},body:params});
   const data=await response.json();
   if(!response.ok)throw new Error(data.error?.message||'Falha ao criar pagamento');
   return data;
 }
 async function stripeStatus(id){const response=await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}`,{headers:{Authorization:`Bearer ${stripeKey}`}});if(!response.ok)throw new Error('Falha ao conferir pagamento');return response.json()}
+async function ensureStripeProduct(material,sourceId){
+  if(!stripeKey)return {};
+  const id=sourceId?`pb_drive_${sourceId}`:`pb_store_${material.id}`;
+  const headers={Authorization:`Bearer ${stripeKey}`};
+  let response=await fetch(`https://api.stripe.com/v1/products/${encodeURIComponent(id)}`,{headers});
+  let product=await response.json();
+  if(response.status===404){
+    const params=new URLSearchParams({id,name:material.title,description:material.description,'default_price_data[currency]':'brl','default_price_data[unit_amount]':String(material.price)});
+    response=await fetch('https://api.stripe.com/v1/products',{method:'POST',headers:{...headers,'Content-Type':'application/x-www-form-urlencoded','Idempotency-Key':`catalog-${id}-${material.price}`},body:params});product=await response.json();
+  }
+  if(!response.ok||!product.active||!product.default_price)throw new Error('Não foi possível cadastrar o produto na Stripe.');
+  const priceResponse=await fetch(`https://api.stripe.com/v1/prices/${encodeURIComponent(product.default_price)}`,{headers}),price=await priceResponse.json();
+  if(!priceResponse.ok||!price.active||price.currency!=='brl'||price.unit_amount!==material.price||price.type!=='one_time')throw new Error('O preço da Stripe não corresponde ao preço do PDF.');
+  return {stripe_product_id:product.id,stripe_price_id:price.id};
+}
 function verifiedWebhook(raw,header){if(!webhookSecret||!header)return false;const parts=Object.fromEntries(header.split(',').map(part=>part.split('=')));const timestamp=Number(parts.t);if(!timestamp||Math.abs(Date.now()/1000-timestamp)>300)return false;const expected=crypto.createHmac('sha256',webhookSecret).update(`${parts.t}.${raw.toString('utf8')}`).digest('hex');return safeEqual(expected,parts.v1||'')}
 function markPaid(orderId,session){const list=orders(),order=list.find(item=>item.id===orderId);if(!order||order.session!==session.id||session.payment_status!=='paid')return false;if(order.status!=='pago'){order.status='pago';order.paidAt=Date.now();writeJson(ORDERS,list)}return true}
 async function refreshUserOrders(userId){if(!stripeKey)return;const pending=orders().filter(order=>order.userId===userId&&order.status!=='pago'&&order.session).slice(0,5);for(const order of pending){try{markPaid(order.id,await stripeStatus(order.session))}catch{}}}
 
 async function renderPdfPreviews(file){
   const pdfjs=await pdfjsPromise;
-  const pdf=await pdfjs.getDocument({data:new Uint8Array(file),isEvalSupported:false,enableXfa:false,useWorkerFetch:false}).promise;
+  const loadingTask=pdfjs.getDocument({data:new Uint8Array(file),isEvalSupported:false,enableXfa:false,useWorkerFetch:false});
+  const pdf=await loadingTask.promise;
+  const pageCount=pdf.numPages;
   const previews=[],width=450,height=600;
   for(let number=1;number<=Math.min(pdf.numPages,3);number++){
     const page=await pdf.getPage(number),base=page.getViewport({scale:1}),scale=Math.min(width/base.width,height/base.height),viewport=page.getViewport({scale});
@@ -99,8 +116,8 @@ async function renderPdfPreviews(file){
     context.save();context.translate(width/2,height/2);context.rotate(-Math.PI/4);context.textAlign='center';context.textBaseline='middle';context.font='bold 58px Arial';context.fillStyle='rgba(7,84,152,.22)';context.fillText('PRÉVIA',0,0);context.restore();
     previews.push(canvas.toBuffer('image/webp',78));page.cleanup();
   }
-  await pdf.destroy();
-  return{pageCount:pdf.numPages,previews};
+  await loadingTask.destroy();
+  return{pageCount,previews};
 }
 async function storePreview(productId,index,image){
   if(supabaseUrl&&supabaseServiceRoleKey){
@@ -126,7 +143,7 @@ async function googleProviderEnabled(){if(!supabaseUrl||!supabaseAuthApiKey)retu
 const cloudStore=supabaseUrl&&supabaseServiceRoleKey?require('./cloud-store.cjs')({
   base:supabaseUrl.replace(/\/$/,''),secret:supabaseServiceRoleKey,authKey:supabaseAuthApiKey,
   send,body,json,cookies,sessionCookie,publicProduct,renderPdfPreviews,storePreview,
-  stripeSession,stripeStatus,verifiedWebhook,stripeReady:!!stripeKey,webhookReady:!!webhookSecret,
+  stripeSession,stripeStatus,ensureStripeProduct,verifiedWebhook,stripeReady:!!stripeKey,webhookReady:!!webhookSecret,
   adminPassword:process.env.WONDERLEARN_ADMIN_PASSWORD||'',safeEqual,publicBase:(process.env.PUBLIC_BASE_URL||'http://localhost:3000').replace(/\/$/,'')
 }):null;
 
