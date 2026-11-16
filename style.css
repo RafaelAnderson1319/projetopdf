@@ -415,9 +415,8 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .search-field svg{stroke:var(--ink)}
 .filter-field{color:var(--ink)}
 .clear-button{color:var(--brand-dark);text-decoration:underline;text-underline-offset:4px}
-.material-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:38px 26px;align-items:start}
-.material{grid-column:span 4;min-width:0;padding:0 0 22px;border:0;border-bottom:1px solid var(--hairline);background:transparent}
-.material:nth-child(3n+2){margin-top:34px}
+.material-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:38px 26px;align-items:stretch}
+.material{grid-column:span 4;min-width:0;display:flex;flex-direction:column;padding:0 0 22px;border:0;border-bottom:1px solid var(--hairline);background:transparent}
 .material-cover{width:min(100%,300px);aspect-ratio:3/4;display:block;margin:0 0 14px;padding:6px;border:1px solid var(--hairline);border-radius:2px;background:var(--sheet);box-shadow:3px 4px 0 rgba(27,27,27,.14);cursor:pointer}
 .material-cover img{width:100%;height:100%;display:block;object-fit:contain}
 .cover-fallback{height:100%;display:grid;place-items:center;padding:22px;color:var(--ink);font:600 1.4rem/1.1 var(--font-display);text-align:center}
@@ -425,7 +424,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .material-level,.material-grade{width:auto;max-width:100%;padding:0;border:0;border-radius:0;background:none;color:var(--brand-dark);font-size:.64rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase}
 .material h3{margin-top:10px;font:600 1.72rem/1.04 var(--font-display);color:var(--ink);letter-spacing:-.025em}
 .material p{min-height:0;margin-top:8px;color:var(--muted)}
-.meta{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin-top:14px;padding-top:10px;border-top:1px solid var(--line);font-size:.77rem}
+.meta{display:grid;grid-template-columns:1fr auto;gap:6px 12px;margin-top:auto;padding-top:10px;border-top:1px solid var(--line);font-size:.77rem}
 .meta strong{grid-column:2;grid-row:1/3;color:var(--ink);font:600 1.18rem var(--font-display)}
 .material-format{display:none}
 .material-preview-link{display:block;margin-top:12px;padding:0;border:0;border-radius:0;background:none;color:var(--brand-dark);font-size:.8rem;font-weight:700;text-decoration:underline;text-underline-offset:4px}
