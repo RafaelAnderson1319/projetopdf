@@ -61,7 +61,7 @@ function currentUser(req){const id=userSessions.get(cookies(req).pequenos_sessio
 function requireAdmin(req,res){if(adminAuthenticated(req))return true;send(res,401,{error:'Acesso do administrador necessário'});return false}
 function requireUser(req,res){const user=currentUser(req);if(user)return user;send(res,401,{error:'Entre na sua conta para continuar'});return null}
 function publicUser(user){return{id:user.id,name:user.name,email:user.email}}
-function publicProduct(p){return{id:p.id,title:p.title,level:p.level,subject:p.subject,grade:p.grade,description:p.description,price:p.price,created:p.created,active:p.active!==false,previewUrls:Array.isArray(p.previewUrls)?p.previewUrls:[],pageCount:Number(p.pageCount)||0}}
+function publicProduct(p){return{id:p.id,title:p.title,level:p.level,subject:p.subject,grade:p.grade,description:p.description,price:p.price,created:p.created,active:p.active!==false,previewUrls:Array.isArray(p.previewUrls)?p.previewUrls.slice(0,1):[],pageCount:Number(p.pageCount)||0}}
 function products(){return readJson(PRODUCTS,[])}
 function orders(){return readJson(ORDERS,[])}
 function users(){return readJson(USERS,[])}
