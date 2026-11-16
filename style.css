@@ -413,7 +413,7 @@ a:focus-visible,button:focus-visible,input:focus-visible,select:focus-visible,te
 .clear-button{color:var(--brand-dark);text-decoration:underline;text-underline-offset:4px}
 .material-grid{grid-template-columns:repeat(12,minmax(0,1fr));gap:38px 26px;align-items:stretch}
 .material{grid-column:span 4;min-width:0;display:flex;flex-direction:column;padding:0 0 22px;border:0;border-bottom:1px solid var(--hairline);background:transparent}
-.material-cover{width:min(100%,300px);aspect-ratio:3/4;display:block;margin:0 0 14px;padding:6px;border:1px solid var(--hairline);border-radius:2px;background:var(--sheet);box-shadow:3px 4px 0 rgba(27,27,27,.14);cursor:pointer}
+.material-cover{width:min(100%,300px);aspect-ratio:3/4;display:block;margin:0 auto 14px;padding:6px;border:1px solid var(--hairline);border-radius:2px;background:var(--sheet);box-shadow:3px 4px 0 rgba(27,27,27,.14);cursor:pointer}
 .material-cover img{width:100%;height:100%;display:block;object-fit:contain}
 .cover-fallback{height:100%;display:grid;place-items:center;padding:22px;color:var(--ink);font:600 1.4rem/1.1 var(--font-display);text-align:center}
 .material-top{justify-content:flex-start;gap:12px;min-height:0}
