@@ -87,6 +87,7 @@ async function stripeSession(order,items,req){
   return data;
 }
 async function stripeStatus(id){const response=await fetch(`https://api.stripe.com/v1/checkout/sessions/${encodeURIComponent(id)}`,{headers:{Authorization:`Bearer ${stripeKey}`}});if(!response.ok)throw new Error('Falha ao conferir pagamento');return response.json()}
+async function stripeSessionByPaymentIntent(id){const params=new URLSearchParams({payment_intent:id,limit:'1'}),response=await fetch(`https://api.stripe.com/v1/checkout/sessions?${params}`,{headers:{Authorization:`Bearer ${stripeKey}`}});if(!response.ok)throw new Error('Falha ao localizar a compra reembolsada');return (await response.json()).data?.[0]||null}
 async function ensureStripeProduct(material,sourceId){
   if(!stripeKey)return {};
   const id=sourceId?`pb_drive_${sourceId}`:`pb_store_${material.id}`;
@@ -104,6 +105,7 @@ async function ensureStripeProduct(material,sourceId){
 }
 function verifiedWebhook(raw,header){if(!webhookSecret||!header)return false;const parts=Object.fromEntries(header.split(',').map(part=>part.split('=')));const timestamp=Number(parts.t);if(!timestamp||Math.abs(Date.now()/1000-timestamp)>300)return false;const expected=crypto.createHmac('sha256',webhookSecret).update(`${parts.t}.${raw.toString('utf8')}`).digest('hex');return safeEqual(expected,parts.v1||'')}
 function markPaid(orderId,session){const list=orders(),order=list.find(item=>item.id===orderId);if(!order||order.session!==session.id||session.payment_status!=='paid')return false;if(order.status!=='pago'){order.status='pago';order.paidAt=Date.now();writeJson(ORDERS,list)}return true}
+function markRefunded(orderId,sessionId){const list=orders(),order=list.find(item=>item.id===orderId&&item.session===sessionId);if(!order)return false;if(order.status!=='cancelado'){order.status='cancelado';order.refundedAt=Date.now();writeJson(ORDERS,list)}return true}
 async function refreshUserOrders(userId){if(!stripeKey)return;const pending=orders().filter(order=>order.userId===userId&&order.status!=='pago'&&order.session).slice(0,5);for(const order of pending){try{markPaid(order.id,await stripeStatus(order.session))}catch{}}}
 
 async function renderPdfPreviews(file){
@@ -149,7 +151,7 @@ async function googleProviderEnabled(){if(!supabaseUrl||!supabaseAuthApiKey)retu
 const cloudStore=supabaseUrl&&supabaseServiceRoleKey?require('./cloud-store.cjs')({
   base:supabaseUrl.replace(/\/$/,''),secret:supabaseServiceRoleKey,authKey:supabaseAuthApiKey,
   send,body,json,cookies,sessionCookie,publicProduct,renderPdfPreviews,storePreview,
-  stripeSession,stripeStatus,ensureStripeProduct,verifiedWebhook,stripeReady:!!stripeKey,webhookReady:!!webhookSecret,
+  stripeSession,stripeStatus,stripeSessionByPaymentIntent,ensureStripeProduct,verifiedWebhook,stripeReady:!!stripeKey,webhookReady:!!webhookSecret,
   adminPassword:process.env.WONDERLEARN_ADMIN_PASSWORD||'',safeEqual,publicBase:(process.env.PUBLIC_BASE_URL||'http://localhost:3000').replace(/\/$/,'')
 }):null;
 
@@ -230,7 +232,7 @@ async function handleRequest(req,res){try{
   if(route==='/api/account/library'&&method==='GET'){
     const user=requireUser(req,res);if(!user)return;
     await refreshUserOrders(user.id);
-    const list=orders().filter(order=>order.userId===user.id).map(order=>({id:order.id,status:order.status,created:order.created,paidAt:order.paidAt||null,total:order.total,items:order.items.map(item=>({...item,available:fs.existsSync(path.join(PDF_DIR,item.id+'.pdf'))}))}));
+    const list=orders().filter(order=>order.userId===user.id&&order.status!=='cancelado').map(order=>({id:order.id,status:order.status,created:order.created,paidAt:order.paidAt||null,total:order.total,items:order.items.map(item=>({...item,available:order.status==='pago'&&fs.existsSync(path.join(PDF_DIR,item.id+'.pdf'))}))}));
     return send(res,200,{orders:list});
   }
   const accountDownload=route.match(/^\/api\/account\/download\/([a-f0-9-]+)\/([a-f0-9-]+)$/);
@@ -261,7 +263,7 @@ async function handleRequest(req,res){try{
   }
   const orderStatus=route.match(/^\/api\/orders\/([a-f0-9-]+)$/);if(orderStatus&&method==='GET'){const list=orders(),order=list.find(item=>item.id===orderStatus[1]&&item.access===url.searchParams.get('acesso'));if(!order)return send(res,404,{error:'Pedido não encontrado'});if(order.status!=='pago'&&stripeKey&&order.session){try{markPaid(order.id,await stripeStatus(order.session))}catch{}}const updated=orders().find(item=>item.id===order.id);return send(res,200,{id:updated.id,status:updated.status,items:updated.items,total:updated.total})}
   const download=route.match(/^\/api\/orders\/([a-f0-9-]+)\/download\/([a-f0-9-]+)$/);if(download&&method==='GET'){const order=orders().find(item=>item.id===download[1]&&item.access===url.searchParams.get('acesso'));if(!order||order.status!=='pago'||!order.items.some(item=>item.id===download[2]))return send(res,403,{error:'Compra não confirmada'});const file=path.join(PDF_DIR,download[2]+'.pdf');if(!fs.existsSync(file))return send(res,404,{error:'Arquivo indisponível'});res.writeHead(200,{'Content-Type':'application/pdf','Content-Disposition':`attachment; filename="material-${download[2]}.pdf"`});return fs.createReadStream(file).pipe(res)}
-  if(route==='/api/stripe/webhook'&&method==='POST'){const raw=await body(req,1024*1024);if(!verifiedWebhook(raw,req.headers['stripe-signature']))return send(res,400,{error:'Assinatura inválida'});const event=json(raw);if(['checkout.session.completed','checkout.session.async_payment_succeeded'].includes(event.type))markPaid(event.data.object.metadata?.order_id,event.data.object);return send(res,200,{received:true})}
+  if(route==='/api/stripe/webhook'&&method==='POST'){const raw=await body(req,1024*1024);if(!verifiedWebhook(raw,req.headers['stripe-signature']))return send(res,400,{error:'Assinatura inválida'});const event=json(raw);if(['checkout.session.completed','checkout.session.async_payment_succeeded'].includes(event.type))markPaid(event.data.object.metadata?.order_id,event.data.object);if(event.type==='charge.refunded'){const charge=event.data.object,amount=Number(charge.amount),amountRefunded=Number(charge.amount_refunded),fullRefund=charge.refunded===true||(amount>0&&amountRefunded>=amount),paymentIntent=typeof charge.payment_intent==='string'?charge.payment_intent:charge.payment_intent?.id;if(fullRefund&&paymentIntent){const session=await stripeSessionByPaymentIntent(paymentIntent);if(session?.metadata?.order_id)markRefunded(session.metadata.order_id,session.id)}}return send(res,200,{received:true})}
   return send(res,404,{error:'Não encontrado'});
 }catch(error){console.error(error);if(!res.headersSent)send(res,error.status||500,{error:error.status?error.message:'Erro no servidor'})}}
 

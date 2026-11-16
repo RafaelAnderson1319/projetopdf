@@ -22,7 +22,7 @@ Com Supabase configurado, contas usam Supabase Auth; produtos, pedidos, direitos
 
 ## Stripe
 
-Configure `STRIPE_SECRET_KEY` no servidor para habilitar o checkout. Use uma chave de teste durante a validação. Configure um webhook apontando para `https://SEU-DOMINIO/api/stripe/webhook`, defina `STRIPE_WEBHOOK_SECRET` e escute `checkout.session.completed` e `checkout.session.async_payment_succeeded`.
+Configure `STRIPE_SECRET_KEY` no servidor para habilitar o checkout. Use uma chave de teste durante a validação. Configure um webhook apontando para `https://SEU-DOMINIO/api/stripe/webhook`, defina `STRIPE_WEBHOOK_SECRET` e escute `checkout.session.completed`, `checkout.session.async_payment_succeeded` e `charge.refunded`. Quando a Stripe confirmar um reembolso integral, o pedido é cancelado, o PDF sai da biblioteca e o download é bloqueado. Reembolsos parciais mantêm o acesso.
 
 Para ativar os avisos de temas e as prévias de PDF, execute `supabase/theme_alerts.sql` e `supabase/material_previews.sql` no SQL Editor do projeto Supabase e configure `SUPABASE_URL` e `SUPABASE_SERVICE_ROLE_KEY` no arquivo `.env` do servidor. A chave `service_role` deve permanecer somente no servidor. O bucket `pdf-previews` guarda apenas imagens WebP com marca d'água; os PDFs originais ficam no bucket privado `pdfs` quando a integração Supabase está configurada. Sem as variáveis, o servidor mantém as prévias localmente e os avisos informam que o Supabase ainda não está configurado.
 

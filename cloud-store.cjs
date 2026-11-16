@@ -5,7 +5,7 @@ const {Readable} = require('node:stream');
 // to the browser. Local development without Supabase still uses server.cjs.
 module.exports = function createCloudStore(options) {
   const {base, secret, authKey, send, body, json, cookies, sessionCookie,
-    publicProduct, renderPdfPreviews, storePreview, stripeSession, stripeStatus, ensureStripeProduct,
+    publicProduct, renderPdfPreviews, storePreview, stripeSession, stripeStatus, stripeSessionByPaymentIntent, ensureStripeProduct,
     verifiedWebhook, stripeReady, webhookReady, adminPassword, safeEqual, publicBase} = options;
   const headers = {apikey: secret, Authorization: `Bearer ${secret}`};
   const error = (message, status = 502) => Object.assign(new Error(message), {status});
@@ -98,6 +98,19 @@ module.exports = function createCloudStore(options) {
       p_session_id: session.id, p_amount: session.amount_total, p_currency: session.currency,
       p_payment_intent: typeof session.payment_intent === 'string' ? session.payment_intent : null
     }});
+  }
+  async function markRefunded(charge) {
+    const paymentIntent = typeof charge.payment_intent === 'string' ? charge.payment_intent : charge.payment_intent?.id;
+    const amount = Number(charge.amount), amountRefunded = Number(charge.amount_refunded);
+    const fullyRefunded = charge.refunded === true || (amount > 0 && amountRefunded >= amount);
+    if (!fullyRefunded || !/^pi_[A-Za-z0-9]+$/.test(paymentIntent || '') || !stripeSessionByPaymentIntent) return false;
+    const session = await stripeSessionByPaymentIntent(paymentIntent);
+    if (!session?.id || session.payment_intent !== paymentIntent || !/^[a-f0-9-]{36}$/.test(session.metadata?.order_id || '')) return false;
+    const matches = await rest(`store_orders?id=eq.${session.metadata.order_id}&select=id,stripe_session_id`);
+    if (!matches[0] || matches[0].stripe_session_id !== session.id) return false;
+    await rest(`purchases?stripe_payment_intent=eq.${encodeURIComponent(paymentIntent)}`, {method: 'PATCH', prefer: 'return=minimal', data: {status: 'refunded'}});
+    await rest(`store_orders?id=eq.${session.metadata.order_id}`, {method: 'PATCH', prefer: 'return=minimal', data: {status: 'cancelado'}});
+    return true;
   }
   async function storage(path, method = 'GET', file, upsert = false) {
     const response = await fetch(`${base}/storage/v1/object/${method === 'GET' ? 'authenticated/' : ''}pdfs/${path.split('/').map(encodeURIComponent).join('/')}`, {
@@ -210,6 +223,7 @@ module.exports = function createCloudStore(options) {
         const session = event.data.object;
         if (session.payment_status === 'paid' && !await markPaid(session)) throw error('Pedido não corresponde ao pagamento.', 409);
       }
+      if (event.type === 'charge.refunded') await markRefunded(event.data.object);
       send(res, 200, {received: true}); return true;
     }
     if (route === '/api/account/library' && method === 'GET') {

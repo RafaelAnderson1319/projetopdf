@@ -34,7 +34,7 @@ Para desenvolvimento, adicione http://localhost:3000/account às URLs permitidas
 
 ## Stripe e publicação
 
-Cadastre na Stripe um webhook para https://pequenosbrincantes.vercel.app/api/stripe/webhook com os eventos checkout.session.completed e checkout.session.async_payment_succeeded. Use o segredo do mesmo ambiente das chaves.
+Cadastre na Stripe um webhook para https://pequenosbrincantes.vercel.app/api/stripe/webhook com os eventos checkout.session.completed, checkout.session.async_payment_succeeded e charge.refunded. Use o segredo do mesmo ambiente das chaves. Quando a Stripe confirmar o reembolso integral, o pedido será cancelado, o PDF sairá da biblioteca do comprador e os downloads serão bloqueados. Reembolsos parciais mantêm o acesso.
 
 Publique o código atualizado depois de salvar as variáveis. Deployments antigos não recebem as novas variáveis automaticamente.
 
