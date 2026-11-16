@@ -39,10 +39,10 @@ const assets={
   '/icone-fundamental-ii.png':'icone-fundamental-ii.png',
   '/textura_formas.png':'textura_formas.png','/textura_educativa.png':'textura_educativa.png',
   '/textura_papel.png':'textura_papel.png','/textura_rabiscos.png':'textura_rabiscos.png',
-  '/':'index.html','/index.html':'index.html','/account':'account.html','/account.html':'account.html',
+  '/':'index.html','/index.html':'index.html','/account':'account.html','/account.html':'account.html','/politicas':'politicas.html','/politicas.html':'politicas.html',
   '/painel_admin':'painel_admin.html','/painel_admin.html':'painel_admin.html','/style.css':'style.css','/account.css':'account.css',
   '/admin.css':'admin.css','/hero.jpg':'hero.jpg','/brand-logo.png':'brand-logo.png',
-  '/assets/app.js':'assets/app.js','/assets/account.js':'assets/account.js','/assets/dashboard.js':'assets/dashboard.js',
+  '/assets/app.js':'assets/app.js','/assets/account.js':'assets/account.js','/assets/dashboard.js':'assets/dashboard.js','/assets/hero-atividade-foto.jpg':'assets/hero-atividade-foto.jpg',
   '/assets/twemoji/1f9e9.svg':'assets/twemoji/1f9e9.svg','/assets/twemoji/270f.svg':'assets/twemoji/270f.svg',
   '/assets/twemoji/1f52c.svg':'assets/twemoji/1f52c.svg','/assets/twemoji/1f393.svg':'assets/twemoji/1f393.svg',
   '/assets/twemoji/1f4d6.svg':'assets/twemoji/1f4d6.svg','/assets/twemoji/1f392.svg':'assets/twemoji/1f392.svg'

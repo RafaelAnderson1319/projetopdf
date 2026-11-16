@@ -3,7 +3,7 @@
   "framework": null,
   "builds": [
     {
-      "src": "@(index|account|painel_admin).html",
+      "src": "@(index|account|painel_admin|politicas).html",
       "use": "@vercel/static"
     },
     {
@@ -20,6 +20,10 @@
     },
     {
       "src": "assets/@(app|account|dashboard).js",
+      "use": "@vercel/static"
+    },
+    {
+      "src": "assets/*.jpg",
       "use": "@vercel/static"
     },
     {
